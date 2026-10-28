@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env*
+!.env.example
+tsconfig.tsbuildinfo
+.next-*/
+data/
+work/
+*.sqlite*
+miniprogram/data/snapshot.js
+cloudfunctions/getFeed/snapshot-data.js
+supabase/seed.sql
+docs/V1验收报告.md
+docs/V1-首页恢复与功能复验.md

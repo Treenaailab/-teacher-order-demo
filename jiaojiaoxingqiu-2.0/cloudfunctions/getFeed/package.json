@@ -1,0 +1,7 @@
+{
+  "name": "getFeed",
+  "version": "1.0.0",
+  "description": "家教星球老师端公开订单数据",
+  "main": "index.js",
+  "dependencies": {}
+}

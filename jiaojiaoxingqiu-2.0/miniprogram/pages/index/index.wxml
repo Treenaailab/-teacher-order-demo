@@ -1,0 +1,182 @@
+<!-- 家教星球 · 老师端订单流 -->
+<view class="app">
+  <!-- 顶部品牌 -->
+  <view class="nav">
+    <view class="nav-brand"><view class="nav-logo">家</view><text>家教星球</text></view>
+    <view class="nav-chip">让教与学相遇</view>
+  </view>
+
+  <!-- Hero -->
+  <view class="hero">
+    <view class="eyebrow"><view class="live-dot"></view>家教星球 · 广州家教机会</view>
+    <view class="hero-title">认真教学的你，<text class="hero-em">值得被看见。</text></view>
+    <view class="hero-sub">在这里找到合适的学生，每一份新机会，都从一次认真了解开始。</view>
+    <view class="hero-proof">
+      <view class="proof-item">✓ 人工审核发布</view>
+      <view class="proof-item">✓ 完整订单信息</view>
+      <view class="proof-item">✓ 微信助理承接</view>
+    </view>
+  </view>
+
+  <!-- 数据看板 -->
+  <view class="overview">
+    <view class="stats">
+      <view class="stat" bindtap="onQuickToday">
+        <view class="stat-label">今日新增</view>
+        <view class="stat-num">{{todayCount}}<text class="stat-unit">单</text></view>
+        <view class="stat-note">今天发布的新机会</view>
+      </view>
+      <view class="stat" bindtap="onQuickAll">
+        <view class="stat-label">当前可咨询</view>
+        <view class="stat-num">{{totalCount}}<text class="stat-unit">单</text></view>
+        <view class="stat-note">公开展示，可向助理确认</view>
+      </view>
+      <view class="stat {{todayHigh ? '' : 'stat-dim'}}" bindtap="onQuickHighest">
+        <view class="stat-label">今日最高时薪</view>
+        <view class="stat-num">{{todayHigh ? '¥' + todayHigh : '—'}}<text class="stat-unit" wx:if="{{todayHigh}}">/小时</text></view>
+        <view class="stat-note">{{todayHigh ? '查看今日高薪机会' : '今日暂无新单报价'}}</view>
+      </view>
+    </view>
+    <view class="ticker" wx:if="{{tickerLines.length}}">
+      <view class="ticker-title"><view class="live-dot"></view>订单更新</view>
+      <view class="ticker-line" wx:for="{{tickerLines}}" wx:key="id">
+        <text class="ticker-time">{{item.time}}</text>{{item.text}}
+      </view>
+    </view>
+    <view class="consult-note">“当前可咨询”表示订单正在公开展示，是否仍有名额请通过微信向助理确认。</view>
+  </view>
+
+  <!-- 订单流 -->
+  <view class="section" id="feed">
+    <view class="section-head">
+      <view>
+        <view class="eyebrow">今日机会 · 持续更新</view>
+        <view class="section-title">刷一刷，今天又有什么新单子</view>
+        <view class="section-note">卡片就是完整详情，找到合适的订单后复制给微信助理。</view>
+      </view>
+    </view>
+
+    <!-- 筛选区 -->
+    <view class="filter-box">
+      <view class="search-row">
+        <text class="search-icon">⌕</text>
+        <input class="search-input" placeholder="搜订单编号、地点、年级、科目…" value="{{filters.query}}" bindinput="onQuery" confirm-type="search" />
+        <text class="search-clear" wx:if="{{filters.query}}" bindtap="onClearQuery">✕</text>
+        <view class="filter-toggle {{expanded ? 'selected' : ''}}" bindtap="onToggleExpand">
+          组合筛选{{activeTagCount ? ' (' + activeTagCount + ')' : ''}}
+        </view>
+      </view>
+
+      <!-- 订单池 -->
+      <view class="chip-row">
+        <text class="chip-label">订单池</text>
+        <view class="chip {{filters.pools.length === 0 ? 'selected' : ''}}" bindtap="onClearPools">全部</view>
+        <view class="chip {{item.on ? 'selected' : ''}}" wx:for="{{poolOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onTogglePool">{{item.label}}</view>
+      </view>
+
+      <!-- 区域 -->
+      <view class="chip-row">
+        <text class="chip-label">区域</text>
+        <view class="chip {{item.on ? 'selected' : ''}}" wx:for="{{districtOptions}}" wx:key="index" data-value="{{item}}" bindtap="onToggleDistrict">{{item}}</view>
+      </view>
+
+      <!-- 展开区 -->
+      <view wx:if="{{expanded}}">
+        <view class="chip-row">
+          <text class="chip-label">科目</text>
+          <view class="chip {{item.on ? 'selected' : ''}}" wx:for="{{subjectOptions}}" wx:key="index" data-value="{{item}}" bindtap="onToggleSubject">{{item}}</view>
+        </view>
+        <view class="chip-row">
+          <text class="chip-label">年级</text>
+          <view class="chip {{item.on ? 'selected' : ''}}" wx:for="{{gradeOptions}}" wx:key="index" data-value="{{item}}" bindtap="onToggleGrade">{{item}}</view>
+        </view>
+        <view class="form-grid">
+          <picker class="field" range="{{typeLabels}}" value="{{typeIndex}}" bindchange="onTypeChange">
+            <view class="field-label">老师类型</view>
+            <view class="field-value">{{typeIndex > 0 ? typeLabels[typeIndex] : '不限'}}</view>
+          </picker>
+          <picker class="field" range="{{dateLabels}}" value="{{dateIndex}}" bindchange="onDateChange">
+            <view class="field-label">发布时间</view>
+            <view class="field-value">{{dateIndex > 0 ? dateLabels[dateIndex] : '不限'}}</view>
+          </picker>
+          <view class="field">
+            <view class="field-label">最低时薪（元/h）</view>
+            <input class="field-input" type="number" value="{{filters.min}}" bindinput="onMinInput" placeholder="不限" />
+          </view>
+          <view class="field">
+            <view class="field-label">最高时薪（元/h）</view>
+            <input class="field-input" type="number" value="{{filters.max}}" bindinput="onMaxInput" placeholder="不限" />
+          </view>
+        </view>
+        <view class="chip-row">
+          <text class="chip-label">时间</text>
+          <view class="chip {{item.on ? 'selected' : ''}}" wx:for="{{timeOptions}}" wx:key="index" data-value="{{item}}" bindtap="onToggleTime">{{item}}</view>
+        </view>
+        <view class="filter-note">不同条件同时满足，同一条件多选满足任意一个即可。待遇按所选老师类型筛选。</view>
+      </view>
+
+      <!-- 已选条件 -->
+      <view class="active-filters" wx:if="{{activeTags.length}}">
+        <text class="af-label">已选</text>
+        <view class="af-tag" wx:for="{{activeTags}}" wx:key="index" data-index="{{index}}" bindtap="onRemoveTag">{{item.label}} ✕</view>
+        <view class="af-clear" bindtap="onClearAll">清除全部筛选</view>
+      </view>
+    </view>
+
+    <view class="alert" wx:if="{{minMaxError}}">最低时薪不能高于最高时薪，请调整筛选范围。</view>
+
+    <!-- 结果数 -->
+    <view class="results-head">
+      <text>找到 <text class="strong">{{resultCount}}</text> 条家教机会</text>
+      <text class="results-note">最新发布优先 · 每页10条</text>
+    </view>
+
+    <!-- 订单卡片 -->
+    <view class="grid">
+      <view class="card" wx:for="{{pageCards}}" wx:key="id">
+        <view class="card-head">
+          <view class="badge badge-{{item.poolClass}}">{{item.poolText}}</view>
+          <text class="order-code">{{item.orderCode}}</text>
+          <text class="card-time"><text wx:if="{{item.isNew}}" class="new-mark">NEW · </text>{{item.timeText}}</text>
+        </view>
+        <view class="card-title">{{item.grade}}<text class="title-sep"> / </text>{{item.subjectText}}</view>
+        <view class="facts">
+          <view class="fact" wx:for="{{item.facts}}" wx:for-item="fact" wx:key="label">
+            <text class="fact-dt">{{fact.label}}</text>
+            <text class="fact-dd">{{fact.value}}</text>
+          </view>
+        </view>
+        <view class="card-foot">
+          <text class="card-contact">复制订单，微信咨询助理</text>
+          <view class="copy-btn {{item.copied ? 'copied' : ''}}" data-index="{{item.idx}}" bindtap="onCopy">{{item.copied ? '✓ 已复制' : '复制完整信息'}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view class="empty" wx:if="{{loaded && !resultCount}}">
+      <view class="empty-icon">⌕</view>
+      <view class="empty-title">暂时没有符合条件的订单</view>
+      <view class="empty-note">可以减少一些条件，或稍后再来看看新机会。</view>
+      <view class="empty-btn" bindtap="onClearAll">查看全部订单</view>
+    </view>
+
+    <!-- 分页 -->
+    <view class="pagination" wx:if="{{pages > 1}}">
+      <view class="page-btn {{page === 1 ? 'disabled' : ''}}" bindtap="onPrevPage">上一页</view>
+      <text class="page-info">第 <text class="strong">{{page}}</text> / {{pages}} 页</text>
+      <view class="page-btn {{page === pages ? 'disabled' : ''}}" bindtap="onNextPage">下一页</view>
+    </view>
+  </view>
+
+  <!-- 底部 -->
+  <view class="footer">
+    <view>家教星球 · 让每一份认真教学，都遇见合适的机会。</view>
+    <view class="footer-sub">平台统一审核订单与老师资料，咨询、试课和收付款沟通由助理在微信承接。</view>
+  </view>
+
+  <!-- Toast -->
+  <view class="toast" wx:if="{{toast}}">
+    <text>✓</text>{{toast}}
+  </view>
+</view>

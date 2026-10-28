@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "pages/index/index"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#4338ca",
+    "navigationBarTitleText": "家教星球 · 找家教单",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f6f5fb"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}
